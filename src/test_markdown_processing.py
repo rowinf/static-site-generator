@@ -2,6 +2,7 @@ import unittest
 from textnode import TextNode, TextType
 from markdown_processing import (
     extract_markdown_links,
+    markdown_to_blocks,
     split_nodes_delimiter,
     extract_markdown_images,
     split_nodes_image,
@@ -128,5 +129,24 @@ class TestMarkdownProcessing(unittest.TestCase):
                 ),
                 TextNode(" and a ", TextType.TEXT),
                 TextNode("link", TextType.LINK, "https://boot.dev"),
+            ],
+        )
+
+    def test_markdown_to_blocks(self):
+        text = """
+        This is the first section. It has multiple lines.
+
+        This is the second section. It also has multiple lines.
+
+        Another section is here. It is also separated by blank lines.
+
+        """
+        blocks = markdown_to_blocks(text)
+        self.assertEqual(
+            blocks,
+            [
+                "This is the first section. It has multiple lines.",
+                "This is the second section. It also has multiple lines.",
+                "Another section is here. It is also separated by blank lines.",
             ],
         )

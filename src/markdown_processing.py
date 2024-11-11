@@ -85,3 +85,11 @@ def text_to_textnodes(text):
     new_nodes = split_nodes_link(new_nodes)
     new_nodes = split_nodes_image(new_nodes)
     return new_nodes
+
+
+def markdown_to_blocks(markdown):
+    blocks = []
+    block_pattern = r"((?:[^\n]+\n?)+)\n{2,}"
+    for match in re.finditer(block_pattern, markdown):
+        blocks.append(match.group(1).strip())
+    return blocks

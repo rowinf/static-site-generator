@@ -1,6 +1,7 @@
 import unittest
-from textnode import TextNode, TextType
+from textnode import BlockType, TextNode, TextType
 from markdown_processing import (
+    block_to_block_type,
     extract_markdown_links,
     markdown_to_blocks,
     split_nodes_delimiter,
@@ -150,3 +151,18 @@ class TestMarkdownProcessing(unittest.TestCase):
                 "Another section is here. It is also separated by blank lines.",
             ],
         )
+
+    def test_block_to_block_type(self):
+        heading = "###### I am Heading"
+        para = "I am paragraph"
+        unordered_list = """* Item 1
+* Item 2"""
+        code_block = """```Item
+        ```"""
+        block_quote = """> Start
+> end quote"""
+        self.assertEqual(block_to_block_type(heading), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(para), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(unordered_list), BlockType.UNORDERED_LIST)
+        self.assertEqual(block_to_block_type(code_block), BlockType.CODE)
+        self.assertEqual(block_to_block_type(block_quote), BlockType.QUOTE)

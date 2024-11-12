@@ -1,6 +1,6 @@
 import re
 from htmlnode import LeafNode
-from textnode import TextType, TextNode
+from textnode import BlockType, TextType, TextNode
 
 
 def _delimiter_segment(text, delimiter, segments, start=0, inside=False):
@@ -93,3 +93,42 @@ def markdown_to_blocks(markdown):
     for match in re.finditer(block_pattern, markdown):
         blocks.append(match.group(1).strip())
     return blocks
+
+
+def all_lines_start_with_asterisk(section):
+    lines = section.splitlines()  # Split section into lines
+    return all(re.match(r"^\* ", line) for line in lines)
+
+
+def all_lines_start_with_number(section):
+    lines = section.splitlines()  # Split section into lines
+    return all(re.match(r"^\d+\. ", line) for line in lines)
+
+
+def enclosed_with_code_ticks(section):
+    lines = section.splitlines()
+    return (
+        len(lines) > 1
+        and lines[0][0:3] == "```"
+        and lines[len(lines) - 1][-3:] == "```"
+    )
+
+
+def all_lines_start_with_caret(section):
+    lines = section.splitlines()  # Split section into lines
+    return all(re.match(r"^\> ", line) for line in lines)
+
+
+def block_to_block_type(block):
+    if re.match(r"^#{1,6}\s+", block):
+        return BlockType.HEADING
+    elif all_lines_start_with_asterisk(block):
+        return BlockType.UNORDERED_LIST
+    elif all_lines_start_with_number(block):
+        return BlockType.ORDERED_LIST
+    elif enclosed_with_code_ticks(block):
+        return BlockType.CODE
+    elif all_lines_start_with_caret(block):
+        return BlockType.QUOTE
+    else:
+        return BlockType.PARAGRAPH

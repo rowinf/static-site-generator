@@ -1,5 +1,5 @@
 import re
-from htmlnode import LeafNode
+from htmlnode import LeafNode, ParentNode, text_node_to_html_node
 from textnode import BlockType, TextType, TextNode
 
 
@@ -89,9 +89,11 @@ def text_to_textnodes(text):
 
 def markdown_to_blocks(markdown):
     blocks = []
-    block_pattern = r"((?:[^\n]+\n?)+)\n{2,}"
+    block_pattern = r"((?:[^\n]+\n?)+?)(?:\n{2,}|\Z)"
     for match in re.finditer(block_pattern, markdown):
-        blocks.append(match.group(1).strip())
+        content = match.group(1).strip()
+        if content:
+            blocks.append(content)
     return blocks
 
 
@@ -132,3 +134,40 @@ def block_to_block_type(block):
         return BlockType.QUOTE
     else:
         return BlockType.PARAGRAPH
+
+
+def markdown_to_html_node(markdown):
+    children = []
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        match block_to_block_type(block):
+            case BlockType.PARAGRAPH:
+                text_nodes = text_to_textnodes(block)
+                inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
+                block_element = ParentNode("p", inline_elements)
+                children.append(block_element)
+            case BlockType.HEADING:
+                h_tag, text = block.split(maxsplit=1)
+                block_element = LeafNode(f"h{len(h_tag)}", text)
+                children.append(block_element)
+            case BlockType.CODE:
+                _, text, _ = block.split(sep="```")
+                child_element = LeafNode("code", text)
+                block_element = ParentNode("pre", [child_element])
+                children.append(block_element)
+            case BlockType.UNORDERED_LIST:
+                text_nodes = [text_to_textnodes(line) for line in block.splitlines()]
+                inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
+                block_element = ParentNode("ul", inline_elements)
+                children.append(block_element)
+            case BlockType.ORDERED_LIST:
+                text_nodes = [text_to_textnodes(line) for line in block.splitlines()]
+                inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
+                block_element = ParentNode("ul", inline_elements)
+                children.append(block_element)
+            case BlockType.QUOTE:
+                text_nodes = [text_to_textnodes(line) for line in block.splitlines()]
+                inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
+                block_element = ParentNode("blockquote", inline_elements)
+                children.append(block_element)
+    return ParentNode("div", children).to_html()

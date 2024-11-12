@@ -34,7 +34,12 @@ class TestParentNode(unittest.TestCase):
                 LeafNode("p", "This is a text node"),
             ],
         )
-        self.assertEqual(node.to_html(), "<div><p>This is a text node</p></div>")
+        self.assertEqual(
+            node.to_html(),
+            """<div>
+  <p>This is a text node</p>
+</div>""",
+        )
 
 
 class TestTextNodeToHTMLNode(unittest.TestCase):

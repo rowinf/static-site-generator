@@ -4,6 +4,7 @@ from markdown_processing import (
     block_to_block_type,
     extract_markdown_links,
     markdown_to_blocks,
+    markdown_to_html_node,
     split_nodes_delimiter,
     extract_markdown_images,
     split_nodes_image,
@@ -166,3 +167,38 @@ class TestMarkdownProcessing(unittest.TestCase):
         self.assertEqual(block_to_block_type(unordered_list), BlockType.UNORDERED_LIST)
         self.assertEqual(block_to_block_type(code_block), BlockType.CODE)
         self.assertEqual(block_to_block_type(block_quote), BlockType.QUOTE)
+
+    def test_markdown_to_html_node(self):
+        markdown = (
+            """some text and a **bold** statement ![alt txt](https://imgur.com/asdf)"""
+        )
+        self.assertEqual(
+            markdown_to_html_node(markdown),
+            """<div>
+  <p>
+  some text and a <b>bold</b> statement <img src="https://imgur.com/asdf" alt="alt txt"></img>
+</p>
+</div>""",
+        )
+
+        md = "## Heading2 Element"
+        self.assertEqual(
+            markdown_to_html_node(md),
+            """<div>
+  <h2>Heading2 Element</h2>
+</div>""",
+        )
+
+        md2 = """```
+this is code
+```"""
+        self.assertEqual(
+            markdown_to_html_node(md2),
+            """<div>
+  <pre>
+  <code>
+this is code
+</code>
+</pre>
+</div>""",
+        )

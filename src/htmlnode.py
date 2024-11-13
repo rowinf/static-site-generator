@@ -1,4 +1,5 @@
 from textnode import TextType
+import textnode
 
 
 class HTMLNode:

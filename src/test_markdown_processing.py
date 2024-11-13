@@ -4,6 +4,7 @@ from textnode import BlockType, TextNode, TextType
 from markdown_processing import (
     block_to_block_type,
     extract_markdown_links,
+    extract_title,
     markdown_to_blocks,
     markdown_to_html_node,
     split_nodes_delimiter,
@@ -206,3 +207,23 @@ this is code
             "div", [ParentNode("pre", [LeafNode("code", "this is code")])]
         )
         self.assertEqual(markdown_to_html_node(md2), want)
+
+        md3 = """> Life is like a box of chocolates
+> You never know what yer gonna git."""
+        want = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "blockquote",
+                    [
+                        LeafNode("", "Life is like a box of chocolates"),
+                        LeafNode("", "You never know what yer gonna git."),
+                    ],
+                )
+            ],
+        )
+        self.assertEqual(markdown_to_html_node(md3), want)
+
+    def test_extract_title(self):
+        md = """# this title"""
+        self.assertEqual(extract_title(md), "this title")

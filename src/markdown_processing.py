@@ -136,6 +136,17 @@ def block_to_block_type(block):
         return BlockType.PARAGRAPH
 
 
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        match block_to_block_type(block):
+            case BlockType.HEADING:
+                h_tag, text = block.split(maxsplit=1)
+                if len(h_tag) == 1:
+                    return text
+    raise Exception()
+
+
 def markdown_to_html_node(markdown):
     children = []
     blocks = markdown_to_blocks(markdown)
@@ -156,18 +167,23 @@ def markdown_to_html_node(markdown):
                 block_element = ParentNode("pre", [child_element])
                 children.append(block_element)
             case BlockType.UNORDERED_LIST:
-                text_nodes = [text_to_textnodes(line) for line in block.splitlines()]
-                inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
-                block_element = ParentNode("ul", inline_elements)
+                text_nodes = [
+                    LeafNode("li", line[line.index(" ") :])
+                    for line in block.splitlines()
+                ]
+                block_element = ParentNode("ul", text_nodes)
                 children.append(block_element)
             case BlockType.ORDERED_LIST:
-                text_nodes = [text_to_textnodes(line) for line in block.splitlines()]
-                inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
-                block_element = ParentNode("ul", inline_elements)
+                text_nodes = [
+                    LeafNode("li", line[line.index(" ") :])
+                    for line in block.splitlines()
+                ]
+                block_element = ParentNode("ol", text_nodes)
                 children.append(block_element)
             case BlockType.QUOTE:
-                text_nodes = [text_to_textnodes(line) for line in block.splitlines()]
-                inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
-                block_element = ParentNode("blockquote", inline_elements)
+                text_nodes = [
+                    LeafNode("", line[line.index(" ") :]) for line in block.splitlines()
+                ]
+                block_element = ParentNode("blockquote", text_nodes)
                 children.append(block_element)
     return ParentNode("div", children)

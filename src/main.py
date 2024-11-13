@@ -19,6 +19,34 @@ def copy_files(srcdir, destdir):
             shutil.copy(pathname, destpath)
 
 
+def generate_page_recursive(dir_path_content, template_path, dest_dir_path):
+    print(
+        f"Generated pages from {dir_path_content} to {dest_dir_path} using {template_path}"
+    )
+    tfile = io.open(template_path)
+    template = tfile.read()
+    tfile.close()
+    for f in os.listdir(dir_path_content):
+        pathname = os.path.join(dir_path_content, f)
+        destpath = os.path.join(dest_dir_path, f)
+        mode = os.lstat(pathname).st_mode
+        if stat.S_ISDIR(mode):
+            os.mkdir(destpath)
+            generate_page_recursive(pathname, template_path, destpath)
+        elif stat.S_ISREG(mode):
+            cfile = io.open(pathname)
+            markdown = cfile.read()
+            cfile.close()
+            title = extract_title(markdown)
+            content_file_dest = os.path.join(dest_dir_path, f.replace(".md", ".html"))
+            with io.open(content_file_dest, "w") as outfile:
+                nodes = markdown_to_html_node(markdown)
+                updated = template.replace("{{ Title }}", title).replace(
+                    "{{ Content }}", nodes.to_html()
+                )
+                outfile.write(updated)
+
+
 def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     tfile = io.open(template_path)
@@ -44,7 +72,7 @@ def main():
         os.mkdir("./public")
     print("\n\ncopying files...")
     copy_files("./static", "./public")
-    generate_page("./content", "./template.html", "./public/")
+    generate_page_recursive("./content", "./template.html", "./public/")
 
 
 if __name__ == "__main__":

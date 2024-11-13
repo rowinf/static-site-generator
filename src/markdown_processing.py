@@ -167,22 +167,25 @@ def markdown_to_html_node(markdown):
                 block_element = ParentNode("pre", [child_element])
                 children.append(block_element)
             case BlockType.UNORDERED_LIST:
-                text_nodes = [
-                    LeafNode("li", line[line.index(" ") :])
-                    for line in block.splitlines()
-                ]
-                block_element = ParentNode("ul", text_nodes)
+                list_items = []
+                for line in block.splitlines():
+                    text_nodes = text_to_textnodes(line[line.index(" ") + 1 :])
+                    html_nodes = [text_node_to_html_node(tn) for tn in text_nodes]
+                    list_items.append(ParentNode("li", html_nodes))
+                block_element = ParentNode("ul", list_items)
                 children.append(block_element)
             case BlockType.ORDERED_LIST:
-                text_nodes = [
-                    LeafNode("li", line[line.index(" ") :])
-                    for line in block.splitlines()
-                ]
-                block_element = ParentNode("ol", text_nodes)
+                list_items = []
+                for line in block.splitlines():
+                    text_nodes = text_to_textnodes(line[line.index(" ") + 1 :])
+                    html_nodes = [text_node_to_html_node(tn) for tn in text_nodes]
+                    list_items.append(ParentNode("li", html_nodes))
+                block_element = ParentNode("ol", list_items)
                 children.append(block_element)
             case BlockType.QUOTE:
                 text_nodes = [
-                    LeafNode("", line[line.index(" ") :]) for line in block.splitlines()
+                    LeafNode("", line[line.index(" ") + 1 :])
+                    for line in block.splitlines()
                 ]
                 block_element = ParentNode("blockquote", text_nodes)
                 children.append(block_element)

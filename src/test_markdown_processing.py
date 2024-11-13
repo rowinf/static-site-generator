@@ -223,6 +223,33 @@ this is code
             ],
         )
         self.assertEqual(markdown_to_html_node(md3), want)
+        md4 = """* item 1
+* item 2 *with a vengeance*
+        """
+        want = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "ul",
+                    [
+                        ParentNode(
+                            "li",
+                            [
+                                LeafNode("", "item 1"),
+                            ],
+                        ),
+                        ParentNode(
+                            "li",
+                            [
+                                LeafNode("", "item 2 "),
+                                LeafNode("b", "with a vengeance"),
+                            ],
+                        ),
+                    ],
+                )
+            ],
+        )
+        self.assertEqual(markdown_to_html_node(md4), want)
 
     def test_extract_title(self):
         md = """# this title"""

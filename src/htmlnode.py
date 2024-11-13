@@ -57,7 +57,7 @@ class ParentNode(HTMLNode):
     def to_html(self):
         childs = map(lambda x: x.to_html(), self.children)
         child_html = "".join(childs)
-        return f"<{self.tag}{self.props_to_html().rstrip()}>\n  {child_html}\n</{self.tag}>"
+        return f"<{self.tag}{self.props_to_html().rstrip()}>{child_html}</{self.tag}>"
 
 
 def text_node_to_html_node(text_node):

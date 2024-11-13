@@ -9,7 +9,7 @@ class HTMLNode:
         self.props = props
 
     def props_to_html(self):
-        if self.props == None:
+        if self.props is None:
             return " "
         items = list(map(lambda x: f' {x[0]}="{x[1]}"', self.props.items()))
         return "".join(items)
@@ -18,15 +18,23 @@ class HTMLNode:
         raise NotImplementedError()
 
     def __eq__(self, other):
+        no_children = self.children is None and other.children is None
+        has_children = self.children is not None and other.children is not None
+        equal_children = has_children and len(self.children) == len(other.children)
         return (
             self.tag == other.tag
             and self.value == other.value
-            and self.children == other.children
+            and ((has_children and equal_children) or no_children)
             and self.props == other.props
         )
 
     def __repr__(self):
-        return f"HTMLNode({self.tag}, {self.value}, Chilren, Props)"
+        child = []
+        if self.children is not None:
+            child = [c for c in self.children]
+        return (
+            f"HTMLNode({self.tag}, {self.value}, Children[{len(child)}], {self.props})"
+        )
 
 
 class LeafNode(HTMLNode):

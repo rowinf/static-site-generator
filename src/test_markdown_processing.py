@@ -1,4 +1,5 @@
 import unittest
+from htmlnode import LeafNode, ParentNode
 from textnode import BlockType, TextNode, TextType
 from markdown_processing import (
     block_to_block_type,
@@ -172,33 +173,36 @@ class TestMarkdownProcessing(unittest.TestCase):
         markdown = (
             """some text and a **bold** statement ![alt txt](https://imgur.com/asdf)"""
         )
-        self.assertEqual(
-            markdown_to_html_node(markdown),
-            """<div>
-  <p>
-  some text and a <b>bold</b> statement <img src="https://imgur.com/asdf" alt="alt txt"></img>
-</p>
-</div>""",
+        nodes = markdown_to_html_node(markdown)
+        want = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "p",
+                    [
+                        LeafNode("", "some text and a "),
+                        LeafNode("b", "bold"),
+                        LeafNode("", " statement "),
+                        LeafNode(
+                            "img",
+                            None,
+                            {"src": "https://imgur.com/asdf", "alt": "alt txt"},
+                        ),
+                    ],
+                )
+            ],
         )
 
+        self.assertEqual(nodes, want)
+
         md = "## Heading2 Element"
-        self.assertEqual(
-            markdown_to_html_node(md),
-            """<div>
-  <h2>Heading2 Element</h2>
-</div>""",
-        )
+        want = ParentNode("div", [ParentNode("h2", "Heading2 Element")])
+        self.assertEqual(markdown_to_html_node(md), want)
 
         md2 = """```
 this is code
 ```"""
-        self.assertEqual(
-            markdown_to_html_node(md2),
-            """<div>
-  <pre>
-  <code>
-this is code
-</code>
-</pre>
-</div>""",
+        want = ParentNode(
+            "div", [ParentNode("pre", [LeafNode("code", "this is code")])]
         )
+        self.assertEqual(markdown_to_html_node(md2), want)

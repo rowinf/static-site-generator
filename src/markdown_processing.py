@@ -170,4 +170,4 @@ def markdown_to_html_node(markdown):
                 inline_elements = [text_node_to_html_node(tn) for tn in text_nodes]
                 block_element = ParentNode("blockquote", inline_elements)
                 children.append(block_element)
-    return ParentNode("div", children).to_html()
+    return ParentNode("div", children)
